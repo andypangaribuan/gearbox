@@ -30,6 +30,7 @@ function help {
 ver=1.0.0
 imageName=gcd:gearbox
 containerName=gearbox
+dockerfilePath=Dockerfile
 gitProject=https://github.com/andypangaribuan/gearbox.git
 
 # token clasic: push package
