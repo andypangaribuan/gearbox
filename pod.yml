@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gearbox
+  namespace: your-ns
+spec:
+  terminationGracePeriodSeconds: 10
+  containers:
+  - name: gearbox
+    image: ghcr.io/andypangaribuan/gearbox:1.0.0
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+      limits:
+        memory: 500Mi
