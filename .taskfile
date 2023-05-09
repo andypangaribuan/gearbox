@@ -50,7 +50,6 @@ function build {
 
 
     echo "build docker image"
-    cd $projectDir
     DOCKER_BUILDKIT=1
     docker build --no-cache \
         -f $dockerfilePath \
