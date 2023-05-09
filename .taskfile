@@ -121,3 +121,13 @@ function stop {
 function exec {
     docker exec -it $containerName sh
 }
+
+
+#: space
+
+
+# ___ do not change ___
+case $1 in
+"") help ;;
+*) "$@" ;;
+esac
