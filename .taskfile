@@ -89,8 +89,6 @@ function push {
 
 #: do cleansing
 function clean {
-    rm -rf clog
-
     docker rmi $imageName || true
     docker rmi $ghcrPath:$ver || true
 
