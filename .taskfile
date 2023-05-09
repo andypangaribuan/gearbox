@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# Copyright (c) 2022.
+# Created by Andy Pangaribuan. All Rights Reserved.
+#
+# This product is protected by copyright and distributed under
+# licenses restricting copying, distribution and decompilation.
+
+# make executable: $ chmod +x .taskfile
+# make alias:
+# - $ subl ~/.zshrc
+# - add line: alias task="./.taskfile"
+# run with $ task
+
+function help {
+    cat .taskfile | \
+    sed 's/#: space/&\nfunction space {/g' | \
+    grep -B1 -E '^[[:space:]]*([[:alnum:]_]+[[:space:]]*\(\)|function[[:space:]]+[[:alnum:]_]+)' | \
+    sed '/function help {/d' | \
+    sed -r 's/function //' | \
+    sed -r 's/ \{/:/' | \
+    grep -v -- -- | \
+    sed '/^\s*$/d' | \
+    sed 'N;s/\n/###/' | \
+    sed -n 's/^#: \(.*\)###\(.*\):.*/\2###→ \1/p' | \
+    column -t -s '###' | \
+    sed 's/.*→ space.*//g'
+}
+
+ver=1.0.0
+imageName=gcd:gearbox
+containerName=gearbox
+gitProject=https://github.com/andypangaribuan/gearbox.git
+
+# token clasic: push package
+ghcrToken=xxx
+ghcrPath=ghcr.io/andypangaribuan/gearbox
+
+
+#: build docker image
+function build {
+    echo "first clean"
+    docker stop $containerName || true
+    docker rm $containerName || true
+
+    docker rmi $imageName || true
+    docker rmi $ghcrPath:$ver || true
+    echo ""
+
+
+    echo "build docker image"
+    cd $projectDir
+    DOCKER_BUILDKIT=1
+    docker build --no-cache \
+        -f $dockerfilePath \
+        --build-arg APP_VERSION=$ver \
+        -t $imageName .
+    echo ""
+    
+
+    echo "change image name"
+    docker tag $imageName $ghcrPath:$ver
+    docker rmi $imageName || true
+    echo ""
+
+    echo "done"
+    echo ""
+
+    qw docker image gearbox
+    echo ""
+
+    echo "next action:"
+    echo "$ task push"
+    echo "$ task clean"
+}
+
+
+#: apply ghcr token (one time only)
+function apply-token {
+    export CR_PAT=$ghcrToken ; echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+}
+
+
+#: push to ghcr.io
+function push {
+    docker push $ghcrPath:$ver
+}
+
+
+#: do cleansing
+function clean {
+    rm -rf clog
+
+    docker rmi $imageName || true
+    docker rmi $ghcrPath:$ver || true
+
+    docker container prune -f
+	docker image prune -f
+    docker builder prune -f
+}
+
+
+#: run on local
+function run {
+    docker stop $containerName || true
+    docker rm $containerName || true
+    docker run -d -it \
+        --name $containerName \
+        $imageName
+}
+
+
+#: stop
+function stop {
+    docker stop $containerName || true
+    docker rm $containerName || true
+}
+
+
+#: exec
+function exec {
+    docker exec -it $containerName sh
+}
